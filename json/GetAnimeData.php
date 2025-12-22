@@ -2,7 +2,7 @@
 $array = array();
 $limit = $_GET["limit"];
 $page = $_GET["page"];
-
+error_reporting(0);
 // 判断获取的参数
 if (empty($limit)) {
     die('limit 为必须参数');
@@ -19,11 +19,14 @@ $pagenum = $page * $limit;  // 第一页为 page = 0
 
 
 //完结状态
-function finish($str1)
+function finish($str1,$str2)
 {
     if (is_numeric($str1) && $str1 == 1) 
     {
         return "已完结";
+    }elseif (is_numeric($str2) && $str2 == 0 )
+    {
+        return "敬请期待";
     } elseif (is_numeric($str1) && $str1 == 0)
     {
         return "连载中";
@@ -81,23 +84,17 @@ function play($num)
     }
     return $num;
 }
-function url ($id,$area)
-{   if ($area ==1) {
-    return "https://www.bilibili.com/bangumi/play/ss". $id ."/";}
-    else {
-    return  "https://www.bilibili.com/bangumi/play/ss". $id ."/";;    
-    }
-}
+
 function area ($num)
 {
     if( $num == 1 ){
-        return "大陆";
+        return "中国大陆";
     } elseif ($num == 2 ){ 
-        return "港澳台";
+        return "中国香港、中国澳门、中国台湾";
     } elseif ($num == 3 ){ 
-        return "港澳";
+        return "中国香港、中国澳门";
     } elseif ($num == 4 ){ 
-        return "台湾";
+        return "中国台湾";
     } else { 
         return "区域未知";
     };
@@ -119,11 +116,11 @@ for ($i = 0; $i < $total; $i++) {
     $array[$i]['view'] = play($biliA->stat_view[$pagenum]);
     $array[$i]['rating_score'] = rating_score($biliA->rating_score[$pagenum]);
     $array[$i]['rating_count'] = rating_count($biliA->rating_count[$pagenum]);
-    $array[$i]['finish'] = finish($biliA->finish[$pagenum]);
+    $array[$i]['finish'] = finish($biliA->finish[$pagenum],$biliA->started[$pagenum]);
     $array[$i]['follow_status'] = follow_status($biliA->follow_status[$pagenum]);
-    $array[$i]['url'] = url($biliA-> season_id[$pagenum],$biliA-> area[$pagenum]);
     $array[$i]['right_area'] = area($biliA-> area[$pagenum]);
     $array[$i]['type'] = $biliA->type[$pagenum];
+    $array[$i]['index_show'] = $biliA->index_show[$pagenum];
     $pagenum++;
 }
 echo '{"total": ' . $total . ',"total_page": ' . $total_page . ', "limit": ' . $limit . ', "page": ' . $page . ', "data":' . json_encode($array, true) . '}';

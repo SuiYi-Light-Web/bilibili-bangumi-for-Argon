@@ -2,7 +2,7 @@
 $array = array();
 $limit = $_GET["limit"];
 $page = $_GET["page"];
-
+error_reporting(0);
 // 判断获取的参数
 if (empty($limit)) {
     die('limit 为必须参数');
@@ -15,7 +15,7 @@ function finish($str1, $str2)
 {
     if (is_numeric($str1) && $str1 == 1 && $str2 == 1){
         return "已完结";
-    } elseif (is_numeric($str1) && $str1 == 1 && $str2 == 0 ){
+    } elseif (is_numeric($str2) && $str2 == 0 ){
         return "敬请期待";
     } elseif (is_numeric($str1) && $str1 == 0){
         return "更新中";
@@ -89,9 +89,10 @@ for ($i = 0; $i < $total; $i++) {
     $array[$i]['view'] = $biliM->stat_view[$pagenum];
     $array[$i]['rating_score'] = rating_score($biliM->rating_score[$pagenum]);
     $array[$i]['rating_count'] = rating_count($biliM->rating_count[$pagenum]);
-    $array[$i]['finish'] = finish($biliM->finish[$pagenum], $biliM->can_watch[$pagenum]);
+    $array[$i]['finish'] = finish($biliM->finish[$pagenum], $biliM->started[$pagenum]);
     $array[$i]['follow_status'] = follow_status($biliM->follow_status[$pagenum]);
     $array[$i]['type'] = $biliM->type[$pagenum];
+    $array[$i]['index_show'] = $biliM->index_show[$pagenum];
     $pagenum++;
 }
 echo '{"total": ' . $total . ',"total_page": ' . $total_page . ', "limit": ' . $limit . ', "page": ' . $page . ', "data":' . json_encode($array, true) . '}';

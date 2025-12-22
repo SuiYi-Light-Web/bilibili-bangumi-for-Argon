@@ -10,16 +10,18 @@ class bilibiliAnime
     public $type =  array();  // 类型
     public $season_id = array();  // ID号
     public $finish  = array(); //完结状态
-    public $follow_status  = array(); //完结状态
+    public $follow_status  = array(); //追番状态
     public $rating_score  = array(); //评分
     public $rating_count  = array(); //评分人数
     public $stat_view  = array(); //播放量
-    public $area =array();
+    public $area = array();//版权区域
+    public $started = array();//开播状态
+    public $index_show = array();//更新信息
     
     // 获取追番总数
     private function getpage($uid)
     {
-        $url = "https://api.bilibili.com/x/space/bangumi/follow/list?type=1&follow_status=0&pn=1&ps=15&vmid=$uid";
+        $url = "https://api.bilibili.com/x/space/bangumi/follow/list?type=1&follow_status=0&pn=1&ps=24&vmid=$uid&playform=web";
         $info = json_decode(file_get_contents($url), true);
         return $info['data']['total'];
     }
@@ -43,7 +45,7 @@ class bilibiliAnime
     {
         $this->total = $this->getpage($uid);
         for ($i = 1; $i <= ceil($this->total / 15); $i++) {
-            $url = "https://api.bilibili.com/x/space/bangumi/follow/list?type=1&follow_status=0&pn=$i&ps=15&vmid=$uid";
+            $url = "https://api.bilibili.com/x/space/bangumi/follow/list?type=1&follow_status=0&pn=$i&ps=24&vmid=$uid&playform=web";
             $info = json_decode(file_get_contents($url), true);
             foreach ($info['data']['list'] as $data) {
                 array_push($this->title, $data['title']);
@@ -52,6 +54,8 @@ class bilibiliAnime
                 array_push($this->type, $data['season_type_name']);
                 array_push($this->season_id, $data['season_id']);
                 array_push($this->finish, $data['is_finish']);
+                array_push($this->started, $data['is_started']);
+                array_push($this->index_show,$data['new_ep']['index_show']);
                 array_push($this->follow_status, $data['follow_status']);
                 if (isset($data["rating"])){
                 array_push($this->rating_score, $data['rating']['score']);
