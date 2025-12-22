@@ -3,6 +3,8 @@
 ### 本项目为 [bilibili](https://github.com/Fog-Forest/bilibili) 的修改版
 注意：特殊适配于[Argon主题](https://github.com/solstice23/argon-theme)~
 
+已使用AI辅助重构前端（2025/12/23）
+
 ### 使用说明
 1. 下载本项目，将 `biliibili-api` 整个目录扔到你的站点根路径，将 `page-anime.php` 和 `page-movie.php` 文件放到你的主题根路径。
 
