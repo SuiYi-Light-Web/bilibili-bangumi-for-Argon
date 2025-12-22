@@ -4,9 +4,9 @@
 注意：特殊适配于[Argon主题](https://github.com/solstice23/argon-theme)~
 
 ### 使用说明
-1. 下载本项目，将 `json` 整个目录扔到你的站点根路径，将 `page-anime.php` 和 `page-movie.php` 文件放到你的主题根路径。
+1. 下载本项目，将 `biliibili-api` 整个目录扔到你的站点根路径，将 `page-anime.php` 和 `page-movie.php` 文件放到你的主题根路径。
 
-2. 按照注释，修改 `json` 里的 `bilibiliAcconut.php` 文件，填入你的信息。
+2. 按照注释，修改 `bilibili-api` 里的 `bilibiliAcconut.php` 文件，填入你的信息。
 
 3. 最后在 WP后台 新建页面时选择相应的模板，创建页面即可。
 

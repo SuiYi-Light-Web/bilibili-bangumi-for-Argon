@@ -19,7 +19,6 @@ get_header(); ?>
 </header>
 <?php the_content(); ?>
 
-<link href="/diy/col.min.css" rel="stylesheet">
 <style>
     /* 布局和加载样式 */
     .loading-text {
@@ -453,7 +452,7 @@ get_header(); ?>
                 
                 $.ajax({
                     type: "GET",
-                    url: "/bilibili-api/json/GetAnimeData.php",
+                    url: "/bilibili-api/GetAnimeData.php",
                     data: {
                         limit: this.limit,
                         page: this.pageNum
