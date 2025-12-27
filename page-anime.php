@@ -528,6 +528,7 @@ get_header(); ?>
                 const type = item.type || '未知';
                 const finish = item.finish || '未知';
                 const followStatus = item.follow_status || '未知';
+                const index_show = item.index_show || '暂无剧集信息';
                 
                 return `
                 <div class="bangumi-item col-md-4 col-lg-3 col-sm-6">
@@ -535,7 +536,7 @@ get_header(); ?>
                         <div class="bangumi-banner">
                             <img referrerpolicy="no-referrer" src="${item.image_url}" alt="${title}" loading="lazy" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjVmNWY1Ii8+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNzUsMTUwKSI+PGNpcmNsZSByPSIyNSIgZmlsbD0iI2UwZTBlMCIvPjxwYXRoIGQ9Ik0tMTAtMTBoMjBtLTEwIDEwaDIwbS0xMCAxMGgyMCIgc3Ryb2tlPSIjY2NjIiBzdHJva2Utd2lkdGg9IjIiIGZpbGw9Im5vbmUiLz48L2c+PHRleHQgeD0iMTAwIiB5PSIyMDAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzg4OCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+5Zu+54mH5paH5pysPC90ZXh0Pjwvc3ZnPg=='">
                             <div class="bangumi-des">
-                                <p>《${title}》【${item.index_show}】
+                                <p>《${title}》【${index_show}】
                                 <br>${evaluate}</p>
                                 <div class="score-info">
                                     B站评分<span class="score">${ratingScore}</span>
