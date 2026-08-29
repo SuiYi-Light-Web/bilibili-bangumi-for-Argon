@@ -1,74 +1,151 @@
 <?php
+/**
+ * 追番数据类
+ *
+ * 相比原实现：
+ *  1. 原构造函数每次请求都遍历 B 站全部分页拉取数据；现改为 getData() 静态方法，
+ *     仅当本地缓存过期时才抓取一次，其余请求直接命中缓存。
+ *  2. 分页循环改为按实际页数精确拉取（原代码 ps 与分页计算不一致，存在多余请求）。
+ *  3. 抓取失败时回退旧缓存，保证服务可用；并发请求由锁机制保护，避免缓存风暴。
+ */
+require_once __DIR__ . '/common.php';
+
 class bilibiliAnime
 {
-    public $total;  // 追番总数
-    public $title = array();  // 标题
-    public $image_url = array();  // 图链
-    public $fan_number = array();  // 番剧总集数
-    public $progress = array();  // 观看进度
-    public $evaluate = array();  // 简介
-    public $type =  array();  // 类型
-    public $season_id = array();  // ID号
-    public $finish  = array(); //完结状态
-    public $follow_status  = array(); //追番状态
-    public $rating_score  = array(); //评分
-    public $rating_count  = array(); //评分人数
-    public $stat_view  = array(); //播放量
-    public $area = array();//版权区域
-    public $started = array();//开播状态
-    public $index_show = array();//更新信息
-    
-    // 获取追番总数
-    private function getpage($uid)
+    /**
+     * 获取追番数据（带缓存）。
+     *
+     * @param string $uid     B站 UID
+     * @param int    $ttl     缓存有效期（秒）
+     * @param bool   $refresh 是否强制刷新（跳过缓存直接抓取）
+     * @return array|null  array('total' => int, 'list' => array)，失败且无兜底缓存时返回 null
+     */
+    public static function getData($uid, $ttl = BILI_CACHE_TTL, $refresh = false)
     {
-        $url = "https://api.bilibili.com/x/space/bangumi/follow/list?type=1&follow_status=0&pn=1&ps=24&vmid=$uid&playform=web";
-        $info = json_decode(file_get_contents($url), true);
-        return $info['data']['total'];
-    }
+        $key = 'anime_' . $uid;
 
-    function area ($t)
-{
-    if(stripos($t,"僅限港澳台")){
-        return 2;
-    } elseif (stripos($t,"僅限港澳")){
-        return 3;
-    }
-    elseif (stripos($t,"僅限台灣")){
-        return 4;
-    }
-    else{
-        return 1;
-    };
-}
+        if ($refresh) {
+            bili_cache_clear($key);
+        }
 
-    public function __construct($uid)
-    {
-        $this->total = $this->getpage($uid);
-        for ($i = 1; $i <= ceil($this->total / 15); $i++) {
-            $url = "https://api.bilibili.com/x/space/bangumi/follow/list?type=1&follow_status=0&pn=$i&ps=24&vmid=$uid&playform=web";
-            $info = json_decode(file_get_contents($url), true);
-            foreach ($info['data']['list'] as $data) {
-                array_push($this->title, $data['title']);
-                array_push($this->image_url, str_replace('http://', '//', $data['cover']));  // 协议跟随
-                array_push($this->evaluate, $data['summary']);
-                array_push($this->type, $data['season_type_name']);
-                array_push($this->season_id, $data['season_id']);
-                array_push($this->finish, $data['is_finish']);
-                array_push($this->started, $data['is_started']);
-                array_push($this->index_show,$data['new_ep']['index_show']);
-                array_push($this->follow_status, $data['follow_status']);
-                if (isset($data["rating"])){
-                array_push($this->rating_score, $data['rating']['score']);
-                array_push($this->rating_count, $data['rating']['count']);}
-                else {
-                array_push($this->rating_score, null);
-                array_push($this->rating_count, null);                    
-                }
-                 if (isset($data['stat']['view'])){
-                array_push($this->stat_view, $data['stat']['view']);}
-                else { array_push($this->stat_view, null);}
-                array_push($this->area, $this->area($data['title']));
+        $lock = null;
+        $cached = bili_cache_get($key, $ttl, $lock);
+        if ($cached !== false && $cached !== null) {
+            return $cached; // 命中缓存（含等待其他进程更新后命中）
+        }
+
+        $data = null;
+        if ($cached === false) {
+            // 持有更新锁：负责抓取并写入缓存
+            $data = self::fetchAll($uid);
+            if ($data !== null) {
+                bili_cache_set($key, $data);
             }
+            if ($lock) {
+                @flock($lock, LOCK_UN);
+                @fclose($lock);
+            }
+        } else {
+            // 未取得锁（其他进程正在更新）：直接回退旧缓存
+        }
+
+        if ($data !== null) {
+            return $data;
+        }
+
+        // 抓取失败：回退旧缓存，尽量保证接口可用
+        $stale = bili_cache_get_stale($key);
+        return $stale !== null ? $stale : null;
+    }
+
+    /**
+     * 分页抓取全部追番（type=1）。
+     * 第一页同时读取总数，之后仅拉取剩余页，避免原实现重复请求第一页。
+     *
+     * @return array|null array('total' => int, 'list' => array)，失败返回 null
+     */
+    public static function fetchAll($uid)
+    {
+        $list = array();
+        $ps = BILI_PAGE_SIZE;
+
+        $info = self::fetchPage($uid, 1, $ps);
+        if ($info === null) {
+            return null;
+        }
+        $total = isset($info['total']) ? (int)$info['total'] : 0;
+        if ($total <= 0) {
+            return array('total' => 0, 'list' => array());
+        }
+
+        $pages = (int)ceil($total / $ps);
+        for ($pn = 1; $pn <= $pages; $pn++) {
+            if ($pn > 1) {
+                $info = self::fetchPage($uid, $pn, $ps);
+                if ($info === null) {
+                    break; // 后续页失败则使用已拉取部分
+                }
+            }
+            if (!isset($info['list']) || !is_array($info['list'])) {
+                break;
+            }
+            foreach ($info['list'] as $data) {
+                $list[] = self::normalize($data);
+            }
+            if (count($list) >= $total) {
+                break;
+            }
+        }
+
+        return array('total' => $total, 'list' => $list);
+    }
+
+    /** 抓取单页追番列表 */
+    private static function fetchPage($uid, $pn, $ps)
+    {
+        $url = "https://api.bilibili.com/x/space/bangumi/follow/list?type=1&follow_status=0&pn=$pn&ps=$ps&vmid=$uid&playform=web";
+        $body = bili_http_get($url);
+        if ($body === false) {
+            return null;
+        }
+        $json = json_decode($body, true);
+        if (!is_array($json) || !isset($json['code']) || $json['code'] !== 0 || !isset($json['data'])) {
+            return null;
+        }
+        return $json['data'];
+    }
+
+    /** 规整单条数据（与原实现的字段映射保持一致） */
+    private static function normalize($data)
+    {
+        return array(
+            'title' => isset($data['title']) ? $data['title'] : '',
+            'image_url' => str_replace('http://', '//', isset($data['cover']) ? $data['cover'] : ''), // 协议跟随
+            'evaluate' => isset($data['summary']) ? $data['summary'] : '',
+            'type' => isset($data['season_type_name']) ? $data['season_type_name'] : '',
+            'season_id' => isset($data['season_id']) ? $data['season_id'] : '',
+            'finish' => isset($data['is_finish']) ? $data['is_finish'] : null,
+            'started' => isset($data['is_started']) ? $data['is_started'] : null,
+            'index_show' => isset($data['new_ep']['index_show']) ? $data['new_ep']['index_show'] : '',
+            'follow_status' => isset($data['follow_status']) ? $data['follow_status'] : null,
+            'rating_score' => isset($data['rating']['score']) ? $data['rating']['score'] : null,
+            'rating_count' => isset($data['rating']['count']) ? $data['rating']['count'] : null,
+            'stat_view' => isset($data['stat']['view']) ? $data['stat']['view'] : null,
+            'area' => self::area($data['title']),
+        );
+    }
+
+    /** 版权区域判断（与原 classAnime 的 area 方法一致） */
+    private static function area($title)
+    {
+        if (stripos($title, "僅限港澳台") !== false) {
+            return 2;
+        } elseif (stripos($title, "僅限港澳") !== false) {
+            return 3;
+        } elseif (stripos($title, "僅限台灣") !== false) {
+            return 4;
+        } else {
+            return 1;
         }
     }
 }
