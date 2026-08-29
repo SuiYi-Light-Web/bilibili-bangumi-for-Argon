@@ -1,0 +1,7 @@
+# 禁止直接访问缓存目录（Apache 2.4+ / 兼容旧版）
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Deny from all
+</IfModule>
