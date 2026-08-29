@@ -17,7 +17,7 @@
   * 本次更新由 DeepSeek-V4-Flash 强力支持
 
 ### 使用说明
-1. 下载本项目，将 `biliibili-api` 整个目录扔到你的站点根路径，将 `page-anime.php` 和 `page-movie.php` 文件放到你的主题根路径。
+1. 下载本项目，将 `bilibili-api` 整个目录扔到你的站点根路径，将 `page-anime.php` 和 `page-movie.php` 文件放到你的主题根路径。
 
 2. 按照注释，修改 `bilibili-api` 里的 `bilibiliAcconut.php` 文件，填入你的信息。
 
