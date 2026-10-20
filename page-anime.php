@@ -39,23 +39,21 @@ get_header(); ?>
         --bili-overlay-meta: #666;
         --bili-overlay-border: #eee;
         --bili-title-color: var(--color-text-deeper, #333);
-        --bili-card-bg: var(--color-foreground, #fff);
-        --bili-text: var(--color-text-deeper, #303133);
-        --bili-content-border: #e3e5e7;
-        --bili-badge-bg: #f1f2f3;
-        --bili-badge-color: #6c757d;
-        --bili-type-bg: #e6f4fc;
-        --bili-type-color: #00a1d6;
-        --bili-finish-bg: #e8f8ef;
-        --bili-finish-color: #00b96b;
-        --bili-follow-bg: #fdeef3;
-        --bili-follow-color: #fb7299;
-        --bili-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-        --bili-shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.10);
+        --bili-content-border: #f0f0f0;
+        --bili-badge-bg: #f5f5f5;
+        --bili-badge-color: #666;
+        --bili-type-bg: #e3f2fd;
+        --bili-type-color: #1976d2;
+        --bili-finish-bg: #e8f5e9;
+        --bili-finish-color: #388e3c;
+        --bili-follow-bg: #fff3e0;
+        --bili-follow-color: #f57c00;
+        --bili-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        --bili-shadow-hover: 0 5px 20px rgba(0, 0, 0, 0.15);
         --bili-scrollbar-track: #f1f1f1;
         --bili-spinner-bg: #f3f3f3;
         --bili-loading-bg: rgba(255, 255, 255, 0.8);
-        --bili-muted: #99a2aa;
+        --bili-muted: #999;
         --bili-error-bg: #ffebee;
         --bili-error-color: #f44336;
     }
@@ -63,7 +61,6 @@ get_header(); ?>
     /* 暗黑模式（与主题变量同元素定义，var() 引用自动解析为暗色值） */
     html.darkmode body {
         /* --bili-link-bg / --bili-link-color / --bili-link-color-hover / --bili-title-color
-           --bili-card-bg / --bili-text
            无需覆盖：这些变量在 body 上引用 var(--color-foreground) / var(--color-text-deeper)，
            暗黑模式下自动解析为 #424242 / #eee，OLED 下自动为 #000 / #eee */
         --bili-banner-bg: linear-gradient(135deg, #3a3a3a 0%, #2c2c2c 100%);
@@ -73,20 +70,20 @@ get_header(); ?>
         --bili-overlay-border: #555;
         --bili-title-color: #eee;
         --bili-content-border: #555;
-        --bili-badge-bg: #2c2e33;
-        --bili-badge-color: #99a2aa;
-        /* 三大标签背景色：夜间使用专用深色底（恢复原值）
-           标签文字不定义夜间值，回落到 body 浅色值（#00a1d6 / #00b96b / #fb7299），
-           即夜间保持与普通模式相同的文字颜色（配合下方 html.darkmode .badge.* 覆盖，防止主题刷白） */
-        --bili-type-bg: #16304a;
-        --bili-finish-bg: #123426;
-        --bili-follow-bg: #3d1f2b;
-        --bili-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
-        --bili-shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.6);
+        --bili-badge-bg: #555;
+        --bili-badge-color: #ccc;
+        --bili-type-bg: rgba(25, 118, 210, 0.28);
+        --bili-type-color: #82b1ff;
+        --bili-finish-bg: rgba(56, 142, 60, 0.28);
+        --bili-finish-color: #81c784;
+        --bili-follow-bg: rgba(245, 124, 0, 0.28);
+        --bili-follow-color: #ffb74d;
+        --bili-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+        --bili-shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.55);
         --bili-scrollbar-track: #333;
         --bili-spinner-bg: #666;
         --bili-loading-bg: rgba(66, 66, 66, 0.8);
-        --bili-muted: #7d858c;
+        --bili-muted: #999;
         --bili-error-bg: rgba(244, 67, 54, 0.22);
         --bili-error-color: #ef9a9a;
     }
@@ -175,6 +172,10 @@ get_header(); ?>
         min-height: 300px;
     }
 
+    .row {
+        margin: 0 10px;
+    }
+
     /* 错误提示（原内联样式改为类，随暗黑模式自动适配） */
     .error-message {
         width: 100%;
@@ -186,161 +187,196 @@ get_header(); ?>
         margin: 10px 0;
     }
 
-    /* ==================== 追番列表（列表布局，参照「番剧列表布局测试 · dev-1」） ====================
-       结构：封面 | 标题+评分+评分人数 / 三大标签 / index_show / 简介 / 版权地区 */
-    .anime-list {
+    /* 追番卡片样式 */
+    .bangumi-item {
+        margin: 20px 0;
+        padding: 0;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+
+    .bangumi-item:hover {
+        transform: translateY(-5px);
+    }
+
+    .bangumi-link {
+        display: block;
+        padding: 0;
+        border: none;
+        text-decoration: none;
+        color: var(--bili-link-color);
+        border-radius: 8px;
+        overflow: hidden;
+        background: var(--bili-link-bg);
+        box-shadow: var(--bili-shadow);
+        transition: box-shadow 0.3s ease, color 0.3s ease;
+        height: 100%;
+    }
+
+    .bangumi-link:hover {
+        box-shadow: var(--bili-shadow-hover);
+        color: var(--bili-link-color-hover);
+    }
+
+    /* 暗黑模式下主题自带 a 标签配色优先级更高，此处显式覆盖 */
+    html.darkmode .bangumi-link {
+        color: var(--bili-link-color);
+    }
+
+    html.darkmode .bangumi-link:hover {
+        color: var(--bili-link-color-hover);
+    }
+
+    .bangumi-banner {
+        position: relative;
+        overflow: hidden;
+        background: var(--bili-banner-bg);
+    }
+
+    .bangumi-banner img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .bangumi-link:hover .bangumi-banner img {
+        transform: scale(1.05);
+    }
+
+    .bangumi-des {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--bili-overlay-bg);
+        padding: 15px;
+        opacity: 0;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
         display: flex;
         flex-direction: column;
-        gap: 14px;
-        margin: 10px 0;
+        overflow: hidden;
+        z-index: 2;
     }
 
-    .list-item {
-        display: flex;
-        gap: 16px;
-        padding: 16px;
-        background: var(--bili-card-bg);
-        border: 1px solid var(--bili-content-border);
-        border-radius: 12px;
-        box-shadow: var(--bili-shadow);
-        transition: box-shadow .2s, transform .2s;
+    .bangumi-banner:hover .bangumi-des {
+        opacity: 1;
     }
 
-    .list-item:hover {
-        box-shadow: var(--bili-shadow-hover);
-        transform: translateY(-2px);
-    }
-
-    .cover-link {
-        flex: 0 0 auto;
-        display: block;
-    }
-
-    .cover {
-        width: 150px;
-        aspect-ratio: 3 / 4;
-        object-fit: cover;
-        border-radius: 8px;
-        display: block;
-        background: var(--bili-badge-bg);
-    }
-
-    .item-body {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .title-row {
-        display: flex;
-        align-items: baseline;
-        flex-wrap: wrap;
-        column-gap: 8px;
-        row-gap: 2px;
-    }
-
-    .item-title {
-        margin: 0;
-        font-size: 18px;
-        font-weight: 700;
-        line-height: 1.4;
-        color: var(--bili-title-color);
-    }
-
-    .item-title a {
-        color: inherit;
-        text-decoration: none;
-    }
-
-    .item-title a:hover {
-        text-decoration: underline;
-    }
-
-    /* 夜间模式：主题规则 html.darkmode a { color: var(--themecolor-light) } / a:hover { color: var(--themecolor) }
-       会把标题链接刷成主题色，此处用更高优先级强制标题（含 hover）为白色 */
-    html.darkmode .item-title,
-    html.darkmode .item-title a,
-    html.darkmode .item-title a:hover {
-        color: #fff;
-    }
-
-    .score {
+    .bangumi-des p {
+        margin: 0 0 15px 0;
         font-size: 13px;
-        font-weight: 700;
+        line-height: 1.6;
+        color: var(--bili-overlay-text);
+        overflow-y: auto;
+        flex: 1;
+        text-align: left;
+        padding-right: 5px;
+        max-height: calc(100% - 60px);
+        word-wrap: break-word;
+        white-space: normal;
+    }
+
+    .bangumi-des p::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .bangumi-des p::-webkit-scrollbar-track {
+        background: var(--bili-scrollbar-track);
+        border-radius: 2px;
+    }
+
+    .bangumi-des p::-webkit-scrollbar-thumb {
+        background: #ffa726;
+        border-radius: 2px;
+    }
+
+    .bangumi-des p::-webkit-scrollbar-thumb:hover {
+        background: var(--themecolor);
+    }
+
+    .bangumi-des .score-info {
+        font-size: 13px;
+        color: var(--bili-overlay-meta);
+        text-align: left;
+        padding-top: 10px;
+        border-top: 1px solid var(--bili-overlay-border);
+        margin-top: auto;
+    }
+
+    .bangumi-des .score-info .score {
+        color: #ff9800;
+        font-weight: bold;
+        margin-left: 5px;
+    }
+
+    .bangumi-content {
+        padding: 15px 10px 5px;
+        border-bottom: solid 1px var(--bili-content-border);
+    }
+
+    .bangumi-title {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 600;
+        text-align: center;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        color: var(--bili-title-color);
+        line-height: 1.4;
+    }
+
+    .bangumi-title .score {
+        margin-left: 8px;
         color: #ffa726;
+        font-weight: bold;
+        font-size: 13px;
     }
 
-    .rating-count {
-        font-size: 12px;
-        color: var(--bili-muted);
-    }
-
-    .badges {
+    .bangumi-status {
+        padding: 10px;
+        text-align: center;
         display: flex;
+        justify-content: center;
+        align-items: center;
         flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 8px;
+        gap: 5px;
+        min-height: 50px;
     }
 
-    .badge {
+    .bangumi-follow_status,
+    .bangumi-type,
+    .bangumi-finish {
         font-size: 11px;
-        line-height: 1;
-        padding: 4px 9px;
-        border-radius: 999px;
+        height: 22px;
+        padding: 0 8px;
+        line-height: 22px;
+        border-radius: 11px;
         background: var(--bili-badge-bg);
         color: var(--bili-badge-color);
         font-weight: 500;
         white-space: nowrap;
     }
 
-    .badge.type {
+    .bangumi-type {
         background: var(--bili-type-bg);
         color: var(--bili-type-color);
     }
 
-    .badge.finish {
+    .bangumi-finish {
         background: var(--bili-finish-bg);
         color: var(--bili-finish-color);
     }
 
-    .badge.follow {
+    .bangumi-follow_status {
         background: var(--bili-follow-bg);
         color: var(--bili-follow-color);
-    }
-
-    /* 夜间模式：主题规则 html.darkmode .badge { color:#eee } 会强制把标签文字刷白，
-       此处用更高优先级（html.darkmode .badge.type 等，specificity 高于主题）恢复普通模式的文字颜色 */
-    html.darkmode .badge.type {
-        color: var(--bili-type-color);
-    }
-
-    html.darkmode .badge.finish {
-        color: var(--bili-finish-color);
-    }
-
-    html.darkmode .badge.follow {
-        color: var(--bili-follow-color);
-    }
-
-    .index-show {
-        margin-top: 8px;
-        font-size: 12px;
-        color: var(--bili-text);
-        opacity: .85;
-    }
-
-    .desc {
-        margin: 10px 0 0;
-        font-size: 13px;
-        line-height: 1.65;
-        color: var(--bili-muted);
-        white-space: pre-line;
-        overflow-wrap: break-word;
-    }
-
-    .area {
-        margin-top: 4px;
-        font-size: 12px;
-        color: var(--bili-muted);
     }
 
     .page-header {
@@ -363,22 +399,89 @@ get_header(); ?>
     }
 
     /* 响应式设计 */
-    @media (max-width: 520px) {
-        .cover {
-            width: 108px;
+    @media (max-width: 1199px) {
+        .bangumi-item {
+            margin: 15px 0;
         }
 
-        .item-title {
-            font-size: 16px;
+    }
+
+    @media (max-width: 991px) {
+        .bangumi-des p {
+            font-size: 12.5px;
+            line-height: 1.5;
         }
 
-        .list-item {
-            gap: 12px;
-            padding: 12px;
+
+        .bangumi-title {
+            font-size: 14px;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .row {
+            margin: 0 5px;
+        }
+
+        .bangumi-item {
+            margin: 10px 0;
+        }
+
+
+
+        .bangumi-title {
+            font-size: 14px;
+        }
+
+        .page-header h2 {
+            font-size: 20px;
+        }
+
+        .bangumi-des {
+            padding: 10px;
+        }
+
+        .bangumi-des p {
+            font-size: 12px;
+            max-height: calc(100% - 50px);
+        }
+    }
+
+    @media (max-width: 575px) {
+
+
+        .bangumi-des {
+            padding: 8px;
+        }
+
+        .bangumi-des p {
+            font-size: 11.5px;
+            line-height: 1.4;
+            max-height: calc(100% - 45px);
+        }
+
+        .bangumi-des .score-info {
+            font-size: 12px;
+        }
+
+        .bangumi-status {
+            min-height: 45px;
+            padding: 8px;
+        }
+
+        .bangumi-follow_status,
+        .bangumi-type,
+        .bangumi-finish {
+            font-size: 10px;
+            height: 20px;
+            line-height: 20px;
+            padding: 0 6px;
         }
     }
 
     @media (max-width: 400px) {
+
+
         .page-header h2 {
             font-size: 18px;
         }
@@ -396,7 +499,7 @@ get_header(); ?>
     <div class="page-header">
         <h2>我的追番 <small>当前已追<span id="total" class="loading-text">加载中...</span>部，继续加油！</small></h2>
     </div>
-    <div id="bilibiliAnime" class="anime-list"></div>
+    <div id="bilibiliAnime" class="row"></div>
     <div id="loadMore" class="load-more-btn">加载更多</div>
     <div id="noMoreData" class="no-more-text" style="display: none;">已经到底了哦~</div>
 </div>
@@ -511,40 +614,41 @@ get_header(); ?>
             createItemHtml(item) {
                 const evaluate = item.evaluate ? this.escapeHtml(item.evaluate) : '暂无简介';
                 const title = item.title ? this.escapeHtml(item.title) : '未知标题';
-                // 无评分 / 无评分人数时，前端直接不渲染对应元素（无占位提示词）
-                const scoreHtml = item.rating_score ? `<span class="score">${item.rating_score}</span>` : '';
-                const ratingCountHtml = item.rating_count ? `<span class="rating-count">${item.rating_count}人</span>` : '';
-                const type = item.type ? this.escapeHtml(item.type) : '未知';
-                const finish = item.finish ? this.escapeHtml(item.finish) : '未知';
-                const followStatus = item.follow_status ? this.escapeHtml(item.follow_status) : '未知';
-                const indexShow = item.index_show ? this.escapeHtml(item.index_show) : '暂无剧集信息';
-                // index_show 后以 '·' 分隔追加播放量（"xx次观看"），无播放量则不显示
-                const viewCount = (item.view && String(item.view) !== '暂无播放量') ? this.escapeHtml(String(item.view)) + '次观看' : '';
-                const rightArea = this.escapeHtml(item.right_area || '未知');
-                // 协议相对地址补全 https:（与 dev-1 测试页一致）
-                const img = (item.image_url || '').indexOf('//') === 0 ? 'https:' + item.image_url : item.image_url;
+                const ratingScore = item.rating_score || '暂无评分';
+                const ratingCount = item.rating_count || '不足/未开放';
+                const type = item.type || '未知';
+                const finish = item.finish || '未知';
+                const followStatus = item.follow_status || '未知';
+                const index_show = item.index_show || '暂无剧集信息';
 
                 return `
-                <article class="list-item">
-                    <a class="cover-link" href="${item.url}" target="_blank" rel="noopener noreferrer" title="${title}">
-                        <img class="cover" referrerpolicy="no-referrer" src="${img}" alt="${title}" loading="lazy" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJub25lIi8+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNzUsMTUwKSI+PGNpcmNsZSByPSIyNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjOGE4YThhIiBzdHJva2Utd2lkdGg9IjIiLz48cGF0aCBkPSJNLTEwLTEwaDIwbS0xMCAxMGgyMG0tMTAgMTBoMjAiIHN0cm9rZT0iIzhhOGE4YSIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PC9nPjx0ZXh0IHg9IjEwMCIgeT0iMjEwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM4YThhOGEiIHRleHQtYW5jaG9yPSJtaWRkbGUiPuWbvueJh+WKoOi9veWksei0pTwvdGV4dD48L3N2Zz4='">
+                <div class="bangumi-item col-md-4 col-lg-3 col-sm-6">
+                    <a class="no-line bangumi-link" href="${item.url}" target="_blank" rel="noopener noreferrer" title="${title}">
+                        <div class="bangumi-banner">
+                            <img referrerpolicy="no-referrer" src="${item.image_url}" alt="${title}" loading="lazy" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJub25lIi8+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNzUsMTUwKSI+PGNpcmNsZSByPSIyNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjOGE4YThhIiBzdHJva2Utd2lkdGg9IjIiLz48cGF0aCBkPSJNLTEwLTEwaDIwbS0xMCAxMGgyMG0tMTAgMTBoMjAiIHN0cm9rZT0iIzhhOGE4YSIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PC9nPjx0ZXh0IHg9IjEwMCIgeT0iMjEwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM4YThhOGEiIHRleHQtYW5jaG9yPSJtaWRkbGUiPuWbvueJh+WKoOi9veWksei0pTwvdGV4dD48L3N2Zz4='">
+                            <div class="bangumi-des">
+                                <p>《${title}》【${index_show}】
+                                <br>${evaluate}</p>
+                                <div class="score-info">
+                                    B站评分<span class="score">${ratingScore}</span>
+                                    <br>评分人数 ${ratingCount}
+                                    <br>版权区域 ${item.right_area}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bangumi-content">
+                            <div class="bangumi-title" title="${title}">
+                                ${title}
+                                <span class="score"><small>${item.rating_score || ''}</small></span>
+                            </div>
+                        </div>
+                        <div class="bangumi-status">
+                            <span class="bangumi-type" title="类型">${type}</span>
+                            <span class="bangumi-finish" title="更新状态">${finish}</span>
+                            <span class="bangumi-follow_status" title="追番状态">${followStatus}</span>
+                        </div>
                     </a>
-                    <div class="item-body">
-                        <div class="title-row">
-                            <h3 class="item-title"><a href="${item.url}" target="_blank" rel="noopener noreferrer" title="${title}">${title}</a></h3>
-                            ${scoreHtml}
-                            ${ratingCountHtml}
-                        </div>
-                        <div class="badges">
-                            <span class="badge type" title="类型">${type}</span>
-                            <span class="badge finish" title="更新状态">${finish}</span>
-                            <span class="badge follow" title="追番状态">${followStatus}</span>
-                        </div>
-                        <div class="index-show">${indexShow}${viewCount ? ' · ' + viewCount : ''}</div>
-                        <p class="desc">${evaluate}</p>
-                        <div class="area">版权地区：${rightArea}</div>
-                    </div>
-                </article>`;
+                </div>`;
             }
 
             escapeHtml(text) {
