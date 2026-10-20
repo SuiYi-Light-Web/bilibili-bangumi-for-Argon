@@ -13,6 +13,8 @@
  * 不再每次请求都去 B 站拉全量数据，仅缓存过期时才抓取一次。
  */
 
+error_reporting(0);
+
 /** 缓存有效期（秒）：B 站追番/追剧列表变化不频繁，默认 6 小时刷新一次 */
 if (!defined('BILI_CACHE_TTL')) define('BILI_CACHE_TTL', 6 * 3600);
 
@@ -246,20 +248,20 @@ function bili_follow_status($str1)
     }
 }
 
-/** 播放量格式化为 千 / 万 / 亿（并对空值更健壮） */
+/** 播放量格式化为 k / w / E（兼容原实现，并对空值更健壮） */
 function bili_play($num)
 {
     if ($num == null || !is_numeric($num)) {
         return "暂无播放量";
     }
     if ($num >= 1000 && $num < 10000) {
-        return round(($num / 1000), 2) . '千';
+        return round(($num / 1000), 2) . 'k';
     }
     if ($num >= 10000 && $num < 100000000) {
-        return round(($num / 10000), 2) . '万';
+        return round(($num / 10000), 2) . 'w';
     }
     if ($num >= 100000000) {
-        return round(($num / 100000000), 2) . '亿';
+        return round(($num / 100000000), 2) . 'E';
     }
     return $num;
 }
