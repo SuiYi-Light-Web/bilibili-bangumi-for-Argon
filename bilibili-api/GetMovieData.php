@@ -1,15 +1,4 @@
 <?php
-/**
- * 追剧列表 API（返回 JSON）
- *
- * 相比原实现：
- *  1. 数据改为本地缓存复用：仅缓存过期时才请求 B 站，其他请求零出站、零全量解析。
- *  2. 从缓存数组直接切片返回当前页，不再每次遍历全量数据。
- *  3. limit / page 参数经过整数校验与收敛，避免非法输入。
- *  4. total_page 修正为 ceil(total/limit) - 1（最后一页的页码），避免多余请求。
- *  5. 输出 Content-Type / Cache-Control / ETag，浏览器可缓存，命中返回 304。
- *  6. 支持 ?refresh=1 强制刷新 B 站数据。
- */
 
 require_once __DIR__ . '/common.php';
 require_once __DIR__ . '/bilibiliAcconut.php';

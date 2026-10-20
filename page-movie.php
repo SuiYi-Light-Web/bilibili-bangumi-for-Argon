@@ -1,8 +1,7 @@
 <?php
 
 /**
- Template Name: B站追剧页面
- Template author: 蘑菇君
+ * Template Name: B站追剧页面
  */
 
 get_header(); ?>
@@ -20,15 +19,7 @@ get_header(); ?>
 <?php the_content(); ?>
 
 <style>
-    /* ==================== 配色变量（适配 Argon 主题色 / 暗黑 / OLED 夜间 / 沉浸模式） ====================
-       注意：--bili-* 变量统一定义在 body 元素上，而非 :root / html。
-       原因：Argon 主题的模式变量（--color-foreground / --color-text-deeper 等）定义在
-       body 元素上并按模式切换（html.darkmode body、html.darkmode.amoled-dark body、
-       html.immersion-color body）。CSS 自定义属性的 var() 引用是在"定义该自定义属性的
-       元素"上解析的：若把 --bili-* 定义在 html 元素上，var(--color-foreground) 只会取到
-       :root 中的浅色值 #fff（暗黑值在 body 上，html 元素上没有），导致暗黑/夜间模式下
-       卡片背景仍是白色——即本问题（--bili-link-bg 解析为 #fff）。定义在 body 上后与
-       主题变量同元素解析：暗黑自动取 #424242、OLED 取 #000、沉浸模式自动跟随。 */
+
     body {
         --bili-link-bg: var(--color-foreground, #fff);
         --bili-link-color: var(--color-text-deeper, #212529);
@@ -60,12 +51,8 @@ get_header(); ?>
         --bili-error-color: #f44336;
     }
 
-    /* 暗黑模式（与主题变量同元素定义，var() 引用自动解析为暗色值） */
     html.darkmode body {
-        /* --bili-link-bg / --bili-link-color / --bili-link-color-hover / --bili-title-color
-           --bili-card-bg / --bili-text
-           无需覆盖：这些变量在 body 上引用 var(--color-foreground) / var(--color-text-deeper)，
-           暗黑模式下自动解析为 #424242 / #eee，OLED 下自动为 #000 / #eee */
+
         --bili-banner-bg: linear-gradient(135deg, #3a3a3a 0%, #2c2c2c 100%);
         --bili-overlay-bg: rgba(66, 66, 66, 0.97);
         --bili-overlay-text: #ccc;
@@ -75,9 +62,7 @@ get_header(); ?>
         --bili-content-border: #555;
         --bili-badge-bg: #2c2e33;
         --bili-badge-color: #99a2aa;
-        /* 三大标签背景色：夜间使用专用深色底（恢复原值）
-           标签文字不定义夜间值，回落到 body 浅色值（#00a1d6 / #00b96b / #fb7299），
-           即夜间保持与普通模式相同的文字颜色（配合下方 html.darkmode .badge.* 覆盖，防止主题刷白） */
+
         --bili-type-bg: #16304a;
         --bili-finish-bg: #123426;
         --bili-follow-bg: #3d1f2b;
@@ -91,7 +76,6 @@ get_header(); ?>
         --bili-error-color: #ef9a9a;
     }
 
-    /* OLED 夜间模式（--bili-link-bg 在 body 上引用 var(--color-foreground) 自动取 #000，无需覆盖） */
     html.darkmode.amoled-dark body {
         --bili-banner-bg: linear-gradient(135deg, #1d1d1d 0%, #0f0f0f 100%);
         --bili-overlay-bg: rgba(0, 0, 0, 0.97);
@@ -104,13 +88,12 @@ get_header(); ?>
         --bili-spinner-bg: #333;
     }
 
-    /* 布局和加载样式 */
-    .loading-text {
+    .bilibili-movie-container .loading-text {
         color: var(--bili-muted);
         font-style: italic;
     }
 
-    .load-more-btn {
+    .bilibili-movie-container .load-more-btn {
         margin: 30px auto;
         padding: 12px 30px;
         background: linear-gradient(135deg, var(--themecolor-light) 0%, var(--themecolor) 60%, var(--themecolor-dark) 100%);
@@ -126,24 +109,24 @@ get_header(); ?>
         display: block;
     }
 
-    .load-more-btn:hover {
+    .bilibili-movie-container .load-more-btn:hover {
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(var(--themecolor-rgbstr), 0.45);
     }
 
-    .load-more-btn.loading {
+    .bilibili-movie-container .load-more-btn.loading {
         opacity: 0.7;
         cursor: not-allowed;
     }
 
-    .no-more-text {
+    .bilibili-movie-container .no-more-text {
         text-align: center;
         color: var(--bili-muted);
         padding: 20px;
         font-size: 14px;
     }
 
-    .loading-overlay {
+    .bilibili-movie-container .loading-overlay {
         position: absolute;
         top: 0;
         left: 0;
@@ -156,16 +139,16 @@ get_header(); ?>
         z-index: 10;
     }
 
-    .loading-spinner {
+    .bilibili-movie-container .loading-spinner {
         width: 40px;
         height: 40px;
         border: 3px solid var(--bili-spinner-bg);
         border-top: 3px solid var(--themecolor);
         border-radius: 50%;
-        animation: spin 1s linear infinite;
+        animation: bili-spin 1s linear infinite;
     }
 
-    @keyframes spin {
+    @keyframes bili-spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
@@ -175,8 +158,7 @@ get_header(); ?>
         min-height: 300px;
     }
 
-    /* 错误提示（原内联样式改为类，随暗黑模式自动适配） */
-    .error-message {
+    .bilibili-movie-container .error-message {
         width: 100%;
         text-align: center;
         color: var(--bili-error-color);
@@ -186,16 +168,14 @@ get_header(); ?>
         margin: 10px 0;
     }
 
-    /* ==================== 追剧列表（列表布局，参照「番剧列表布局测试 · dev-1」，与追番页一致） ====================
-       结构：封面 | 标题+评分+评分人数 / 三大标签 / index_show / 简介（追剧数据无版权区域，故不含 .area） */
-    .anime-list {
+    .bilibili-movie-container .anime-list {
         display: flex;
         flex-direction: column;
         gap: 14px;
         margin: 10px 0;
     }
 
-    .list-item {
+    .bilibili-movie-container .list-item {
         display: flex;
         gap: 16px;
         padding: 16px;
@@ -206,17 +186,17 @@ get_header(); ?>
         transition: box-shadow .2s, transform .2s;
     }
 
-    .list-item:hover {
+    .bilibili-movie-container .list-item:hover {
         box-shadow: var(--bili-shadow-hover);
         transform: translateY(-2px);
     }
 
-    .cover-link {
+    .bilibili-movie-container .cover-link {
         flex: 0 0 auto;
         display: block;
     }
 
-    .cover {
+    .bilibili-movie-container .cover {
         width: 150px;
         aspect-ratio: 3 / 4;
         object-fit: cover;
@@ -225,12 +205,12 @@ get_header(); ?>
         background: var(--bili-badge-bg);
     }
 
-    .item-body {
+    .bilibili-movie-container .item-body {
         flex: 1;
         min-width: 0;
     }
 
-    .title-row {
+    .bilibili-movie-container .title-row {
         display: flex;
         align-items: baseline;
         flex-wrap: wrap;
@@ -238,7 +218,7 @@ get_header(); ?>
         row-gap: 2px;
     }
 
-    .item-title {
+    .bilibili-movie-container .item-title {
         margin: 0;
         font-size: 18px;
         font-weight: 700;
@@ -246,89 +226,83 @@ get_header(); ?>
         color: var(--bili-title-color);
     }
 
-    .item-title a {
+    .bilibili-movie-container .item-title a {
         color: inherit;
         text-decoration: none;
     }
 
-    .item-title a:hover {
+    .bilibili-movie-container .item-title a:hover {
         text-decoration: underline;
     }
 
-    /* 夜间模式：主题规则 html.darkmode a { color: var(--themecolor-light) } / a:hover { color: var(--themecolor) }
-       会把标题链接刷成主题色，此处用更高优先级强制标题（含 hover）为白色 */
-    html.darkmode .item-title,
-    html.darkmode .item-title a,
-    html.darkmode .item-title a:hover {
+    html.darkmode .bilibili-movie-container .item-title,
+    html.darkmode .bilibili-movie-container .item-title a,
+    html.darkmode .bilibili-movie-container .item-title a:hover {
         color: #fff;
     }
 
-    .score {
+    .bilibili-movie-container .score {
         font-size: 13px;
         font-weight: 700;
         color: #ffa726;
     }
 
-    .rating-count {
+    .bilibili-movie-container .rating-count {
         font-size: 12px;
         color: var(--bili-muted);
     }
 
-    .badges {
+    .bilibili-movie-container .badges {
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
         margin-top: 8px;
     }
 
-    .badge {
+    .bilibili-movie-container .anime-list .badge {
         font-size: 11px;
         line-height: 1;
         padding: 4px 9px;
         border-radius: 999px;
-        background: var(--bili-badge-bg);
-        color: var(--bili-badge-color);
         font-weight: 500;
         white-space: nowrap;
     }
 
-    .badge.type {
+    .bilibili-movie-container .anime-list .badge.type {
         background: var(--bili-type-bg);
         color: var(--bili-type-color);
     }
 
-    .badge.finish {
+    .bilibili-movie-container .anime-list .badge.finish {
         background: var(--bili-finish-bg);
         color: var(--bili-finish-color);
     }
 
-    .badge.follow {
+    .bilibili-movie-container .anime-list .badge.follow {
         background: var(--bili-follow-bg);
         color: var(--bili-follow-color);
     }
 
-    /* 夜间模式：主题规则 html.darkmode .badge { color:#eee } 会强制把标签文字刷白，
-       此处用更高优先级（html.darkmode .badge.type 等，specificity 高于主题）恢复普通模式的文字颜色 */
-    html.darkmode .badge.type {
+    html.darkmode .bilibili-movie-container .anime-list .badge.type {
         color: var(--bili-type-color);
     }
 
-    html.darkmode .badge.finish {
+    html.darkmode .bilibili-movie-container .anime-list .badge.finish {
         color: var(--bili-finish-color);
     }
 
-    html.darkmode .badge.follow {
+    html.darkmode .bilibili-movie-container .anime-list .badge.follow {
         color: var(--bili-follow-color);
     }
 
-    .index-show {
+    .bilibili-movie-container .index-show {
         margin-top: 8px;
         font-size: 12px;
         color: var(--bili-text);
         opacity: .85;
     }
 
-    .desc {
+    .bilibili-movie-container .desc {
         margin: 10px 0 0;
         font-size: 13px;
         line-height: 1.65;
@@ -337,47 +311,46 @@ get_header(); ?>
         overflow-wrap: break-word;
     }
 
-    .page-header {
+    .bilibili-movie-container .page-header {
         margin-bottom: 30px;
         padding-bottom: 15px;
         border-bottom: 2px solid var(--themecolor);
     }
 
-    .page-header h2 {
+    .bilibili-movie-container .page-header h2 {
         margin: 0;
         color: var(--bili-title-color);
         font-size: 22px;
     }
 
-    .page-header small {
+    .bilibili-movie-container .page-header small {
         color: var(--bili-overlay-meta);
         font-size: 13px;
         margin-left: 8px;
         font-weight: normal;
     }
 
-    /* 响应式设计 */
     @media (max-width: 520px) {
-        .cover {
+        .bilibili-movie-container .cover {
             width: 108px;
         }
 
-        .item-title {
+        .bilibili-movie-container .item-title {
             font-size: 16px;
         }
 
-        .list-item {
+        .bilibili-movie-container .list-item {
             gap: 12px;
             padding: 12px;
         }
     }
 
     @media (max-width: 400px) {
-        .page-header h2 {
+        .bilibili-movie-container .page-header h2 {
             font-size: 18px;
         }
 
-        .page-header small {
+        .bilibili-movie-container .page-header small {
             font-size: 12px;
             display: block;
             margin-left: 0;
@@ -421,14 +394,12 @@ get_header(); ?>
             bindEvents() {
                 const self = this;
 
-                // 点击加载更多
                 this.loadMoreBtn.on('click', function() {
                     if (!self.isLoading && self.hasMore) {
                         self.loadData();
                     }
                 });
 
-                // 滚动加载
                 $(window).on('scroll', this.debounce(() => {
                     if (this.shouldLoadMore()) {
                         this.loadData();
@@ -465,15 +436,12 @@ get_header(); ?>
                     return;
                 }
 
-                // 更新总数
                 if (typeof data.total !== 'undefined' && data.total !== null) {
                     this.totalSpan.text(data.total).removeClass('loading-text');
                 }
 
-                // 渲染数据
                 this.renderItems(data.data);
 
-                // 检查是否还有更多
                 this.pageNum++;
                 if (this.pageNum > data.total_page || data.data.length < this.limit) {
                     this.hasMore = false;
@@ -505,18 +473,14 @@ get_header(); ?>
             createItemHtml(item) {
                 const evaluate = item.evaluate ? this.escapeHtml(item.evaluate) : '暂无简介';
                 const title = item.title ? this.escapeHtml(item.title) : '未知标题';
-                // 无评分 / 无评分人数时，前端直接不渲染对应元素（无占位提示词）
                 const scoreHtml = item.rating_score ? `<span class="score">${item.rating_score}</span>` : '';
                 const ratingCountHtml = item.rating_count ? `<span class="rating-count">${item.rating_count}人</span>` : '';
                 const type = item.type ? this.escapeHtml(item.type) : '未知';
                 const finish = item.finish ? this.escapeHtml(item.finish) : '未知';
                 const followStatus = item.follow_status ? this.escapeHtml(item.follow_status) : '未知';
                 const indexShow = item.index_show ? this.escapeHtml(item.index_show) : '暂无剧集信息';
-                // index_show 后以 '·' 分隔追加播放量（"xx次观看"），无播放量则不显示
                 const viewCount = (item.view && String(item.view) !== '暂无播放量') ? this.escapeHtml(String(item.view)) + '次观看' : '';
-                // 追剧接口无版权区域字段，故列表不渲染 .area；链接由 season_id 拼接
                 const url = 'https://www.bilibili.com/bangumi/play/ss' + (item.id || '') + '/';
-                // 协议相对地址补全 https:（与 dev-1 测试页一致）
                 const img = (item.image_url || '').indexOf('//') === 0 ? 'https:' + item.image_url : item.image_url;
 
                 return `
@@ -590,7 +554,6 @@ get_header(); ?>
             }
         }
 
-        // 初始化
         $(document).ready(function() {
             new BilibiliMovie();
         });
