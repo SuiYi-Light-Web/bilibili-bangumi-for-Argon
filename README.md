@@ -31,8 +31,4 @@
 
 
 
-### 预览
-
-[https://blog.suiyil.cn/bilibili-bangumi](https://blog.suiyil.cn/bilibili-bangumi)
-
 已经把原代码改的乱七八糟了，当前在我的博客可正常运行，有问题请发issue谢谢。
