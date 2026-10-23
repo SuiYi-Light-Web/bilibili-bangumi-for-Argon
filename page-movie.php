@@ -495,9 +495,9 @@ get_header(); ?>
                             ${ratingCountHtml}
                         </div>
                         <div class="badges">
-                            <span class="badge type" title="类型">${type}</span>
-                            <span class="badge finish" title="更新状态">${finish}</span>
-                            <span class="badge follow" title="追剧状态">${followStatus}</span>
+                            <span class="badge type" title="类型：${type}">${type}</span>
+                            <span class="badge finish" title="更新状态：${finish}">${finish}</span>
+                            <span class="badge follow" title="追剧状态：${followStatus}">${followStatus}</span>
                         </div>
                         <div class="index-show">${indexShow}${viewCount ? ' · ' + viewCount : ''}</div>
                         <p class="desc">${evaluate}</p>
